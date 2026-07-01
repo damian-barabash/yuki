@@ -2,9 +2,16 @@ import { useMemo, useState } from 'react'
 import { useData } from '../data.jsx'
 import { yukiFeed } from '../lib/bus.js'
 import { SAFETY, FREQ, weekLimit, unitLabel } from '../lib/food.js'
-import { todayISO, fmtDateFull } from '../lib/dates.js'
+import { todayISO, fmtDateFull, fmtDate, weekday } from '../lib/dates.js'
 
 const MS_WEEK = 7 * 86400000
+
+function dayLabel(iso, today) {
+  const y = new Date(Date.parse(today) - 86400000).toISOString().slice(0, 10)
+  if (iso === today) return 'сегодня'
+  if (iso === y) return 'вчера'
+  return `${fmtDate(iso)} (${weekday(iso)})`
+}
 
 export default function FeedTab() {
   const { foods, feedings, addFeeding, delFeeding } = useData()
@@ -12,6 +19,9 @@ export default function FeedTab() {
   const [openId, setOpenId] = useState(null)
   const [grams, setGrams] = useState('')
   const today = todayISO()
+  const [day, setDay] = useState(today) // which day we log / view
+  const isToday = day === today
+  const lbl = dayLabel(day, today)
 
   const staples = foods.filter((f) => f.is_staple)
   const feedItem = staples.find((f) => f.kind === 'feed')
@@ -24,11 +34,10 @@ export default function FeedTab() {
     return produce.filter((f) => f.name_ru.toLowerCase().includes(s)).slice(0, 40)
   }, [q, produce])
 
-  // counts
   const byId = useMemo(() => Object.fromEntries(foods.map((f) => [f.id, f])), [foods])
-  const todayFeeds = feedings.filter((f) => f.fed_on === today)
-  const vitToday = todayFeeds.filter((f) => f.food_id === vitItem?.id).reduce((s, f) => s + Number(f.amount || 0), 0)
-  const feedToday = todayFeeds.filter((f) => f.food_id === feedItem?.id).reduce((s, f) => s + Number(f.amount || 0), 0)
+  const dayFeeds = feedings.filter((f) => f.fed_on === day)
+  const vitDay = dayFeeds.filter((f) => f.food_id === vitItem?.id).reduce((s, f) => s + Number(f.amount || 0), 0)
+  const feedDay = dayFeeds.filter((f) => f.food_id === feedItem?.id).reduce((s, f) => s + Number(f.amount || 0), 0)
 
   function weekCount(foodId) {
     const since = Date.now() - MS_WEEK
@@ -37,33 +46,33 @@ export default function FeedTab() {
 
   function giveFeed() {
     if (!feedItem) return
-    addFeeding({ food_id: feedItem.id, amount: 1, unit: 'portion' })
-    yukiFeed(feedItem.emoji || '🥣')
+    addFeeding({ food_id: feedItem.id, amount: 1, unit: 'portion', fed_on: day })
+    if (isToday) yukiFeed(feedItem.emoji || '🥣')
   }
   function giveVitamin() {
     if (!vitItem) return
-    addFeeding({ food_id: vitItem.id, amount: 1, unit: 'pcs' })
-    yukiFeed(vitItem.emoji || '💊')
+    addFeeding({ food_id: vitItem.id, amount: 1, unit: 'pcs', fed_on: day })
+    if (isToday) yukiFeed(vitItem.emoji || '💊')
   }
   function removeLastVitamin() {
-    const mine = todayFeeds.filter((f) => f.food_id === vitItem?.id)
+    const mine = dayFeeds.filter((f) => f.food_id === vitItem?.id)
     if (mine[0]) delFeeding(mine[0].id)
   }
 
   function addProduce(food) {
     const g = Number(grams)
     if (!g || g <= 0) return
-    addFeeding({ food_id: food.id, amount: g, unit: 'g' })
-    yukiFeed(food.emoji || '🥗')
+    addFeeding({ food_id: food.id, amount: g, unit: 'g', fed_on: day })
+    if (isToday) yukiFeed(food.emoji || '🥗')
     setOpenId(null)
     setGrams('')
     setQ('')
   }
 
-  // today's produce summary (exclude staples)
-  const producedToday = useMemo(() => {
+  // items eaten on the selected day (produce, excluding staples)
+  const producedDay = useMemo(() => {
     const map = {}
-    for (const f of todayFeeds) {
+    for (const f of dayFeeds) {
       const food = byId[f.food_id]
       if (!food || food.is_staple) continue
       if (!map[f.food_id]) map[f.food_id] = { food, total: 0, ids: [] }
@@ -71,50 +80,63 @@ export default function FeedTab() {
       map[f.food_id].ids.push(f.id)
     }
     return Object.values(map)
-  }, [todayFeeds, byId])
+  }, [dayFeeds, byId])
 
-  // history grouped by day (excluding today)
+  // history: every other day, newest first (tap to open)
   const history = useMemo(() => {
     const days = {}
     for (const f of feedings) {
-      if (f.fed_on === today) continue
+      if (f.fed_on === day) continue
       ;(days[f.fed_on] ||= []).push(f)
     }
     return Object.entries(days)
       .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-      .slice(0, 30)
-  }, [feedings, today])
+      .slice(0, 60)
+  }, [feedings, day])
 
   return (
     <div className="tab">
+      {/* day selector */}
+      <div className="day-bar">
+        <span className="day-ico">📅</span>
+        <input type="date" value={day} max={today} onChange={(e) => setDay(e.target.value || today)} />
+        {!isToday && (
+          <button className="btn btn-ghost btn-sm" onClick={() => setDay(today)}>
+            Сегодня
+          </button>
+        )}
+      </div>
+
       {/* pinned staples */}
       <div className="staples">
         <div className="staple">
           <div className="staple-emoji">{feedItem?.emoji || '🥣'}</div>
           <div className="staple-info">
             <div className="staple-name">Корм</div>
-            <div className="staple-sub">сегодня: {feedToday} порц.</div>
+            <div className="staple-sub">
+              {lbl}: {feedDay} порц.
+            </div>
           </div>
           <button className="btn btn-primary" onClick={giveFeed}>
             + порция
           </button>
         </div>
 
-        <div className={`staple ${vitToday >= (vitItem?.daily_target || 3) ? 'staple-done' : ''}`}>
+        <div className={`staple ${vitDay >= (vitItem?.daily_target || 3) ? 'staple-done' : ''}`}>
           <div className="staple-emoji">{vitItem?.emoji || '💊'}</div>
           <div className="staple-info">
             <div className="staple-name">Витамин C</div>
             <div className="staple-sub">
-              {vitToday} из {vitItem?.daily_target || 3} шт сегодня
+              {vitDay} из {vitItem?.daily_target || 3} шт · {lbl}
             </div>
             <div className="vit-dots">
               {Array.from({ length: vitItem?.daily_target || 3 }).map((_, i) => (
-                <span key={i} className={`vit-dot ${i < vitToday ? 'on' : ''}`} />
+                <span key={i} className={`vit-dot ${i < vitDay ? 'on' : ''}`} />
               ))}
             </div>
           </div>
           <div className="staple-actions">
-            {vitToday > 0 && (
+            {vitDay > 0 && (
               <button className="btn btn-ghost btn-sm" onClick={removeLastVitamin}>
                 −
               </button>
@@ -199,31 +221,33 @@ export default function FeedTab() {
         </ul>
       )}
 
-      {/* today */}
-      <h3 className="list-title">Сегодня съедено</h3>
-      {producedToday.length === 0 && vitToday === 0 && feedToday === 0 && (
-        <div className="empty">Пока сегодня ничего не давали.</div>
+      {/* selected day's log */}
+      <h3 className="list-title">
+        {lbl[0].toUpperCase() + lbl.slice(1)} — съедено
+      </h3>
+      {producedDay.length === 0 && vitDay === 0 && feedDay === 0 && (
+        <div className="empty">В этот день ничего не давали.</div>
       )}
       <ul className="log">
-        {feedToday > 0 && (
+        {feedDay > 0 && (
           <li className="log-row">
             <span className="log-ico">{feedItem?.emoji || '🥣'}</span>
             <span className="log-main">
-              <span className="log-when">Корм — {feedToday} порц.</span>
+              <span className="log-when">Корм — {feedDay} порц.</span>
             </span>
           </li>
         )}
-        {vitToday > 0 && (
+        {vitDay > 0 && (
           <li className="log-row">
             <span className="log-ico">{vitItem?.emoji || '💊'}</span>
             <span className="log-main">
               <span className="log-when">
-                Витамин C — {vitToday}/{vitItem?.daily_target || 3} шт
+                Витамин C — {vitDay}/{vitItem?.daily_target || 3} шт
               </span>
             </span>
           </li>
         )}
-        {producedToday.map((p) => (
+        {producedDay.map((p) => (
           <li key={p.food.id} className="log-row">
             <span className="log-ico">{p.food.emoji}</span>
             <span className="log-main">
@@ -238,12 +262,12 @@ export default function FeedTab() {
         ))}
       </ul>
 
-      {/* history */}
+      {/* other days */}
       {history.length > 0 && (
         <>
-          <h3 className="list-title">По дням</h3>
+          <h3 className="list-title">Другие дни</h3>
           <div className="history">
-            {history.map(([day, list]) => {
+            {history.map(([d, list]) => {
               const map = {}
               for (const f of list) {
                 const food = byId[f.food_id]
@@ -252,8 +276,10 @@ export default function FeedTab() {
                 map[f.food_id].total += Number(f.amount || 0)
               }
               return (
-                <div key={day} className="hist-day">
-                  <div className="hist-date">{fmtDateFull(day)}</div>
+                <button key={d} className="hist-day" onClick={() => setDay(d)}>
+                  <div className="hist-date">
+                    {fmtDateFull(d)} · {weekday(d)}
+                  </div>
                   <div className="hist-items">
                     {Object.values(map).map((m) => (
                       <span key={m.food.id} className="hist-chip">
@@ -261,7 +287,7 @@ export default function FeedTab() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>

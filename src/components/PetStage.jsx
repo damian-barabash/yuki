@@ -77,32 +77,36 @@ export default function PetStage({ tab }) {
   return (
     <section className={`stage ${dirty ? 'stage-dirty' : ''}`}>
       <div className="stage-canvas">
-        <Canvas camera={{ position: [0, 0.3, 4.3], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <Suspense fallback={null}>
-            <YukiModel dirty={dirty} />
-          </Suspense>
-        </Canvas>
+        <div className="bubble-slot">
+          {bubble && (
+            <div className={`bubble ${dirty ? 'bubble-alarm' : ''}`} key={bubble}>
+              {bubble}
+            </div>
+          )}
+        </div>
 
-        {dirty &&
-          SPOTS.map((sp, i) => (
-            <span
-              key={i}
-              className="dirt-spot"
-              style={{ top: sp.top, left: sp.left, width: sp.s, height: sp.s }}
-            />
+        <div className="canvas-holder">
+          <Canvas camera={{ position: [0, 0.15, 4.4], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+            <Suspense fallback={null}>
+              <YukiModel dirty={dirty} />
+            </Suspense>
+          </Canvas>
+
+          {dirty &&
+            SPOTS.map((sp, i) => (
+              <span
+                key={i}
+                className="dirt-spot"
+                style={{ top: sp.top, left: sp.left, width: sp.s, height: sp.s }}
+              />
+            ))}
+
+          {flies.map((f) => (
+            <span key={f.k} className="food-fly">
+              {f.emoji}
+            </span>
           ))}
-
-        {flies.map((f) => (
-          <span key={f.k} className="food-fly">
-            {f.emoji}
-          </span>
-        ))}
-
-        {bubble && (
-          <div className={`bubble ${dirty ? 'bubble-alarm' : ''}`} key={bubble}>
-            {bubble}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* mini stats around Yuki */}

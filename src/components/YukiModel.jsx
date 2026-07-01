@@ -27,7 +27,7 @@ function Model({ dirty }) {
     box.getSize(size)
     box.getCenter(center)
     const maxDim = Math.max(size.x, size.y, size.z) || 1
-    return { scale: 3.1 / maxDim, offset: center }
+    return { scale: 2.8 / maxDim, offset: center }
   }, [model])
 
   // Dirty → muddy tint; clean → restore.
