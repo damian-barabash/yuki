@@ -978,3 +978,31 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
     height: clamp(280px, 42dvh, 420px);
   }
 }
+
+/* desktop / wide: center Yuki, put stats in a centered row below */
+@media (min-width: 760px) {
+  .app-header {
+    text-align: center;
+  }
+  .stage {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: clamp(320px, 46dvh, 470px);
+  }
+  .stage-canvas {
+    width: 100%;
+  }
+  .hud {
+    flex: 0 0 auto;
+    flex-direction: row;
+    width: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .hud-chip {
+    width: auto;
+  }
+}
