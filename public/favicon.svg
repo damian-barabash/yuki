@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#eafaee"/>
+      <stop offset="100%" stop-color="#cdeed6"/>
+    </radialGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c98a55"/>
+      <stop offset="100%" stop-color="#a9713f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- ears -->
+  <ellipse cx="168" cy="150" rx="52" ry="60" fill="#a9713f"/>
+  <ellipse cx="344" cy="150" rx="52" ry="60" fill="#a9713f"/>
+  <ellipse cx="168" cy="158" rx="30" ry="36" fill="#e7a9a0"/>
+  <ellipse cx="344" cy="158" rx="30" ry="36" fill="#e7a9a0"/>
+
+  <!-- head -->
+  <ellipse cx="256" cy="270" rx="176" ry="162" fill="url(#fur)"/>
+
+  <!-- brown top patch (abyssinian look) -->
+  <path d="M256 112 C150 118 118 210 132 268 C170 240 210 232 256 232 C302 232 342 240 380 268 C394 210 362 118 256 112 Z" fill="#8a5a30" opacity="0.55"/>
+
+  <!-- white muzzle -->
+  <ellipse cx="256" cy="330" rx="132" ry="112" fill="#fbf4ec"/>
+
+  <!-- cheeks -->
+  <circle cx="150" cy="322" r="30" fill="#f4c0b6" opacity="0.75"/>
+  <circle cx="362" cy="322" r="30" fill="#f4c0b6" opacity="0.75"/>
+
+  <!-- eyes -->
+  <circle cx="196" cy="276" r="27" fill="#2c2018"/>
+  <circle cx="316" cy="276" r="27" fill="#2c2018"/>
+  <circle cx="205" cy="268" r="9" fill="#fff"/>
+  <circle cx="325" cy="268" r="9" fill="#fff"/>
+
+  <!-- nose + mouth -->
+  <path d="M256 322 l20 16 a20 16 0 0 1 -40 0 Z" fill="#e08a8a"/>
+  <path d="M256 350 v14" stroke="#b9776a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M256 364 q-20 20 -44 8" fill="none" stroke="#b9776a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M256 364 q20 20 44 8" fill="none" stroke="#b9776a" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- front teeth -->
+  <rect x="248" y="372" width="7" height="15" rx="3" fill="#fff"/>
+  <rect x="257" y="372" width="7" height="15" rx="3" fill="#fff"/>
+
+  <!-- whiskers -->
+  <g stroke="#c8a988" stroke-width="4" stroke-linecap="round" opacity="0.8">
+    <path d="M150 340 q-56 -6 -96 6"/>
+    <path d="M150 356 q-56 8 -92 30"/>
+    <path d="M362 340 q56 -6 96 6"/>
+    <path d="M362 356 q56 8 92 30"/>
+  </g>
+</svg>
