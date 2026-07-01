@@ -15,5 +15,5 @@ export const bus = {
 
 // Make Yuki say something for `ms` milliseconds (0 = default).
 export const yukiSay = (text, ms = 0) => bus.emit('say', { text, ms })
-// Fling a food emoji into Yuki's mouth (triggers a thank-you too).
-export const yukiFeed = (emoji) => bus.emit('feed', { emoji })
+// Fling a food into Yuki's mouth (pass the food row → SVG icon; triggers a thank-you too).
+export const yukiFeed = (food) => bus.emit('feed', { food })

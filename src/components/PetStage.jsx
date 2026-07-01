@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import YukiModel from './YukiModel.jsx'
+import FoodIcon from './FoodIcon.jsx'
 import { useData } from '../data.jsx'
 import { bus } from '../lib/bus.js'
 import { WASH, WEIGH, IDLE, pick } from '../lib/phrases.js'
@@ -63,9 +64,9 @@ export default function PetStage({ tab }) {
       transientUntil.current = Date.now() + (ms || 3600)
       setBubble(text)
     })
-    const off2 = bus.on('feed', ({ emoji }) => {
+    const off2 = bus.on('feed', ({ food }) => {
       const k = ++flyKey
-      setFlies((f) => [...f, { k, emoji }])
+      setFlies((f) => [...f, { k, food }])
       setTimeout(() => setFlies((f) => f.filter((x) => x.k !== k)), 1100)
     })
     return () => {
@@ -103,7 +104,7 @@ export default function PetStage({ tab }) {
 
           {flies.map((f) => (
             <span key={f.k} className="food-fly">
-              {f.emoji}
+              <FoodIcon food={f.food} size={38} />
             </span>
           ))}
         </div>

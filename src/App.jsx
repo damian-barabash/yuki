@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from './auth.jsx'
 import { DataProvider, useData } from './data.jsx'
 import Login from './Login.jsx'
+import { ConfirmProvider } from './components/Confirm.jsx'
 import PetStage from './components/PetStage.jsx'
 import BottomTabs from './components/BottomTabs.jsx'
 import CleanTab from './tabs/CleanTab.jsx'
@@ -49,7 +50,9 @@ export default function App() {
   if (!user) return <Login />
   return (
     <DataProvider>
-      <Shell />
+      <ConfirmProvider>
+        <Shell />
+      </ConfirmProvider>
     </DataProvider>
   )
 }

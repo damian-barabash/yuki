@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { useData } from '../data.jsx'
 import { yukiSay } from '../lib/bus.js'
+import { useConfirm } from '../components/Confirm.jsx'
 import { fmtDateTime, daysWord } from '../lib/dates.js'
 
 export default function CleanTab() {
   const { cleanings, addCleaning, delCleaning, status } = useData()
   const { dirty, dSinceClean } = status
+  const confirm = useConfirm()
   const [when, setWhen] = useState('')
+
+  async function removeClean(c) {
+    if (await confirm({ emoji: '🧹', title: 'Удалить запись об уборке?', message: fmtDateTime(c.cleaned_at) })) delCleaning(c.id)
+  }
 
   function cleanNow() {
     addCleaning()
@@ -58,7 +64,7 @@ export default function CleanTab() {
               <span className="log-when">{fmtDateTime(c.cleaned_at)}</span>
               {c.created_by && <span className="log-by">· {c.created_by}</span>}
             </span>
-            <button className="icon-del" onClick={() => delCleaning(c.id)} title="Удалить">
+            <button className="icon-del" onClick={() => removeClean(c)} title="Удалить">
               ✕
             </button>
           </li>

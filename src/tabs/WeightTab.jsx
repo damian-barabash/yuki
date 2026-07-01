@@ -1,15 +1,21 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../data.jsx'
 import WeightChart from '../components/WeightChart.jsx'
+import { useConfirm } from '../components/Confirm.jsx'
 import { todayISO, fmtDateFull, ageString, daysWord } from '../lib/dates.js'
 
 export default function WeightTab() {
   const { weights, addWeight, delWeight, status, pet } = useData()
   const { needsWeigh, dSinceWeigh, lastWeight } = status
+  const confirm = useConfirm()
   const [date, setDate] = useState(todayISO())
   const [grams, setGrams] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+
+  async function removeWeight(w) {
+    if (await confirm({ emoji: '⚖️', title: 'Удалить взвешивание?', message: `${fmtDateFull(w.measured_on)} — ${w.grams} г` })) delWeight(w.id)
+  }
 
   const sorted = useMemo(() => [...weights].sort((a, b) => (a.measured_on < b.measured_on ? 1 : -1)), [weights])
   const latest = sorted[0] || null
@@ -110,7 +116,7 @@ export default function WeightTab() {
               </span>
               {w.note && <span className="log-by">{w.note}</span>}
             </span>
-            <button className="icon-del" onClick={() => delWeight(w.id)} title="Удалить">
+            <button className="icon-del" onClick={() => removeWeight(w)} title="Удалить">
               ✕
             </button>
           </li>
