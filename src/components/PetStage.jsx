@@ -77,7 +77,7 @@ export default function PetStage({ tab }) {
   return (
     <section className={`stage ${dirty ? 'stage-dirty' : ''}`}>
       <div className="stage-canvas">
-        <Canvas camera={{ position: [0, 0.35, 5], fov: 38 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+        <Canvas camera={{ position: [0, 0.3, 4.3], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
           <Suspense fallback={null}>
             <YukiModel dirty={dirty} />
           </Suspense>
