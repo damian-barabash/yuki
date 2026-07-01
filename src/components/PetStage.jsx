@@ -19,7 +19,7 @@ const SPOTS = [
 let flyKey = 0
 
 export default function PetStage({ tab }) {
-  const { status, pet } = useData()
+  const { status } = useData()
   const { dirty, needsWeigh, dSinceClean, lastWeight, vitToday, vitTarget } = status
 
   const [bubble, setBubble] = useState('')
@@ -133,9 +133,6 @@ export default function PetStage({ tab }) {
         </div>
       </div>
 
-      <div className="stage-name">
-        {pet.name || 'Юки'} <span className="stage-emoji">🐹</span>
-      </div>
     </section>
   )
 }

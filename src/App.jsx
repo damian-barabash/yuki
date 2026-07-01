@@ -19,13 +19,18 @@ function Splash({ text = 'Загрузка…' }) {
 }
 
 function Shell() {
-  const { status, loading } = useData()
+  const { status, loading, pet } = useData()
   const [tab, setTab] = useState('clean')
 
   if (loading) return <Splash />
 
   return (
     <div className={`app ${status.dirty ? 'is-dirty' : ''}`}>
+      <header className="app-header">
+        <span className="app-logo">
+          {pet.name || 'Юки'} <span className="app-logo-emoji">🐹</span>
+        </span>
+      </header>
       <PetStage tab={tab} />
       <main className="content">
         {tab === 'clean' && <CleanTab />}

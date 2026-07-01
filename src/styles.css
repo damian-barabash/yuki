@@ -222,6 +222,19 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   background: linear-gradient(170deg, var(--bg1), var(--bg2));
   transition: background 0.6s ease;
 }
+.app-header {
+  flex: 0 0 auto;
+  padding: calc(env(safe-area-inset-top) + 10px) 18px 2px;
+}
+.app-logo {
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: 0.3px;
+}
+.app-logo-emoji {
+  font-size: 20px;
+}
 .content {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -236,8 +249,8 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   display: flex;
   align-items: stretch;
   gap: 8px;
-  height: clamp(270px, 40dvh, 390px);
-  padding: calc(env(safe-area-inset-top) + 4px) 12px 10px;
+  height: clamp(260px, 38dvh, 380px);
+  padding: 2px 12px 10px;
 }
 .stage-canvas {
   position: relative;
