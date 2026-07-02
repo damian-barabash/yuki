@@ -3,6 +3,7 @@ import { useAuth } from '../auth.jsx'
 
 const TABS = [
   { id: 'clean', label: 'Уборка', icon: '🧹' },
+  { id: 'water', label: 'Вода', icon: '💧' },
   { id: 'weight', label: 'Вес', icon: '⚖️' },
   { id: 'feed', label: 'Кормёжка', icon: '🥗' },
   { id: 'settings', label: 'Настройки', icon: '⚙️' },

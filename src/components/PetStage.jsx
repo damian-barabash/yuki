@@ -4,7 +4,7 @@ import YukiModel from './YukiModel.jsx'
 import FoodIcon from './FoodIcon.jsx'
 import { useData } from '../data.jsx'
 import { bus } from '../lib/bus.js'
-import { WASH, WEIGH, IDLE, pick } from '../lib/phrases.js'
+import { WASH, HOT, WEIGH, IDLE, pick } from '../lib/phrases.js'
 import { daysWord } from '../lib/dates.js'
 
 // fixed dirt blotches over the model when the cage is dirty
@@ -17,11 +17,20 @@ const SPOTS = [
   { top: '48%', left: '46%', s: 14 },
 ]
 
+// sweat drops sliding off Yuki when the water is stale (she's "hot")
+const SWEAT = [
+  { top: '30%', left: '42%', d: 0 },
+  { top: '36%', left: '58%', d: 0.7 },
+  { top: '28%', left: '52%', d: 1.3 },
+  { top: '42%', left: '36%', d: 1.9 },
+  { top: '38%', left: '66%', d: 2.5 },
+]
+
 let flyKey = 0
 
 export default function PetStage({ tab }) {
   const { status } = useData()
-  const { dirty, needsWeigh, dSinceClean, lastWeight, vitToday, vitTarget } = status
+  const { dirty, hot, needsWeigh, dSinceClean, dSinceWater, lastWeight, vitToday, vitTarget } = status
 
   const [bubble, setBubble] = useState('')
   const [flies, setFlies] = useState([])
@@ -33,7 +42,9 @@ export default function PetStage({ tab }) {
   // choose the current "background" nag depending on state
   function persistentLine() {
     const s = statusRef.current
+    if (s.dirty && s.hot) return pick(Math.random() < 0.5 ? WASH : HOT, lastRef.current)
     if (s.dirty) return pick(WASH, lastRef.current)
+    if (s.hot) return pick(HOT, lastRef.current)
     if (s.needsWeigh) return pick(WEIGH, lastRef.current)
     return pick(IDLE, lastRef.current)
   }
@@ -51,12 +62,12 @@ export default function PetStage({ tab }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // react instantly when dirty/weigh state flips
+  // react instantly when dirty/hot/weigh state flips
   useEffect(() => {
     if (Date.now() < transientUntil.current) return
     setBubble(persistentLine())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty, needsWeigh])
+  }, [dirty, hot, needsWeigh])
 
   // event bus: manual speak + feeding
   useEffect(() => {
@@ -76,11 +87,11 @@ export default function PetStage({ tab }) {
   }, [])
 
   return (
-    <section className={`stage ${dirty ? 'stage-dirty' : ''}`}>
+    <section className={`stage ${dirty ? 'stage-dirty' : ''} ${hot ? 'stage-hot' : ''}`}>
       <div className="stage-canvas">
         <div className="bubble-slot">
           {bubble && (
-            <div className={`bubble ${dirty ? 'bubble-alarm' : ''}`} key={bubble}>
+            <div className={`bubble ${dirty || hot ? 'bubble-alarm' : ''}`} key={bubble}>
               {bubble}
             </div>
           )}
@@ -102,6 +113,21 @@ export default function PetStage({ tab }) {
               />
             ))}
 
+          {hot && (
+            <>
+              {SWEAT.map((sw, i) => (
+                <span
+                  key={i}
+                  className="sweat-drop"
+                  style={{ top: sw.top, left: sw.left, animationDelay: `${sw.d}s` }}
+                />
+              ))}
+              <span className="heat-wave" style={{ left: '30%' }} />
+              <span className="heat-wave" style={{ left: '50%', animationDelay: '0.9s' }} />
+              <span className="heat-wave" style={{ left: '70%', animationDelay: '1.7s' }} />
+            </>
+          )}
+
           {flies.map((f) => (
             <span key={f.k} className="food-fly">
               <FoodIcon food={f.food} size={38} />
@@ -120,6 +146,16 @@ export default function PetStage({ tab }) {
                 ? 'убрано сегодня'
                 : `${dSinceClean} ${daysWord(dSinceClean)} назад`
               : 'ещё не убирали'}
+          </span>
+        </div>
+        <div className={`hud-chip ${hot ? 'chip-alarm' : ''}`}>
+          <span className="hud-ico">💧</span>
+          <span className="hud-val">
+            {isFinite(dSinceWater)
+              ? dSinceWater === 0
+                ? 'вода свежая'
+                : `вода ${dSinceWater} ${daysWord(dSinceWater)}`
+              : 'воду не меняли'}
           </span>
         </div>
         <div className={`hud-chip ${needsWeigh ? 'chip-alarm' : ''}`}>

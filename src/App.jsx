@@ -6,6 +6,7 @@ import { ConfirmProvider } from './components/Confirm.jsx'
 import PetStage from './components/PetStage.jsx'
 import BottomTabs from './components/BottomTabs.jsx'
 import CleanTab from './tabs/CleanTab.jsx'
+import WaterTab from './tabs/WaterTab.jsx'
 import WeightTab from './tabs/WeightTab.jsx'
 import FeedTab from './tabs/FeedTab.jsx'
 import SettingsTab from './tabs/SettingsTab.jsx'
@@ -26,7 +27,7 @@ function Shell() {
   if (loading) return <Splash />
 
   return (
-    <div className={`app ${status.dirty ? 'is-dirty' : ''}`}>
+    <div className={`app ${status.dirty ? 'is-dirty' : status.hot ? 'is-hot' : ''}`}>
       <header className="app-header">
         <span className="app-logo">
           {pet.name || 'Юки'} <span className="app-logo-emoji">🐹</span>
@@ -35,6 +36,7 @@ function Shell() {
       <PetStage tab={tab} />
       <main className="content">
         {tab === 'clean' && <CleanTab />}
+        {tab === 'water' && <WaterTab />}
         {tab === 'weight' && <WeightTab />}
         {tab === 'feed' && <FeedTab />}
         {tab === 'settings' && <SettingsTab />}
