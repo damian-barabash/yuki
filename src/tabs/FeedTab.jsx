@@ -14,6 +14,7 @@ const CATS = [
   { key: 'fruit', label: 'Фрукты' },
   { key: 'green', label: 'Зелень' },
   { key: 'herb', label: 'Травы' },
+  { key: 'treat', label: 'Лакомства' },
 ]
 
 function dayLabel(iso, today) {

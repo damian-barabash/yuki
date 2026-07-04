@@ -610,6 +610,36 @@ const SHAPES = {
   ),
 }
 
+// dried fruit ring (apple / pear slice): annulus + wrinkle ticks
+SHAPES.driedring = (c) => (
+  <>
+    <path
+      d="M16 6a11 11 0 1 0 0 22 11 11 0 0 0 0-22zm0 6.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z"
+      fill={c}
+      fillRule="evenodd"
+      stroke={shade(c, 0.25)}
+      strokeWidth="0.8"
+    />
+    {Array.from({ length: 7 }).map((_, i) => {
+      const a = (i / 7) * Math.PI * 2 + 0.4
+      return (
+        <line
+          key={i}
+          x1={16 + Math.cos(a) * 6}
+          y1={17 + Math.sin(a) * 6}
+          x2={16 + Math.cos(a) * 8.6}
+          y2={17 + Math.sin(a) * 8.6}
+          stroke={shade(c, 0.3)}
+          strokeWidth="1"
+          strokeLinecap="round"
+          opacity=".5"
+        />
+      )
+    })}
+    <ellipse cx="12" cy="12.5" rx="1.8" ry="2.6" fill="#fff" opacity=".2" transform="rotate(35 12 12.5)" />
+  </>
+)
+
 // slug → [shape, mainColour, accentColour?]
 const MAP = {
   // staples
@@ -764,6 +794,19 @@ const MAP = {
   mushrooms: ['mushroom', '#c8a878'],
   'tomato-leaves': ['leaf', '#4f9a52'],
   'jerusalem-artichoke': ['potato', '#d8b87a'],
+
+  // dried fruits
+  'dried-apple': ['driedring', '#e2b45c'],
+  'dried-pear': ['driedring', '#d9c47c'],
+  'dried-carrot': ['carrot', '#d8873f'],
+  rosehip: ['berry', '#d04a2e'],
+  'dried-apricot': ['stonefruit', '#e09a35'],
+  prunes: ['dates', '#4d3856'],
+  'dried-banana': ['banana', '#d9b45a'],
+  'dried-cranberry': ['berry', '#a83345'],
+  'dried-strawberry': ['strawberry', '#b8434d'],
+  'dried-mango': ['mango', '#d89a45'],
+  'candied-fruit': ['dates', '#d2698a'],
 
   // treats / forbidden
   chocolate: ['chocolate', '#7a4a2b'],
