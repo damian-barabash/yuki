@@ -3,10 +3,12 @@ import { useAuth } from '../auth.jsx'
 import { useData } from '../data.jsx'
 import { callFn } from '../lib/supabase.js'
 import { todayISO } from '../lib/dates.js'
+import VetMode from '../components/VetMode.jsx'
 
 export default function SettingsTab() {
   const { token, user } = useAuth()
   const { pet, updatePet } = useData()
+  const [vetOpen, setVetOpen] = useState(false)
 
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -69,6 +71,18 @@ export default function SettingsTab() {
 
   return (
     <div className="tab">
+      <div className="card vet-entry">
+        <h3 className="list-title">Ветеринар</h3>
+        <p className="hint">
+          Отчёт о здоровье на польском: динамика веса, все взвешивания, питание по месяцам и статистика для осмотра.
+          Открой на приёме или распечатай в PDF.
+        </p>
+        <button className="btn btn-primary btn-block" onClick={() => setVetOpen(true)}>
+          🩺 Tryb weterynaryjny
+        </button>
+      </div>
+      {vetOpen && <VetMode onClose={() => setVetOpen(false)} />}
+
       <div className="card">
         <h3 className="list-title">О питомце</h3>
         <label className="field">
