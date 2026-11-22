@@ -1,65 +1,30 @@
-import { useState } from 'react'
-import { useAuth } from '../auth.jsx'
+import Icon from './Icon.jsx'
 
-const TABS = [
-  { id: 'clean', label: 'Уборка', icon: '🧹' },
-  { id: 'water', label: 'Вода', icon: '💧' },
-  { id: 'weight', label: 'Вес', icon: '⚖️' },
-  { id: 'feed', label: 'Кормёжка', icon: '🥗' },
-  { id: 'settings', label: 'Настройки', icon: '⚙️' },
+export const TABS = [
+  { id: 'home', label: 'Сегодня', icon: 'home' },
+  { id: 'feed', label: 'Еда', icon: 'food' },
+  { id: 'weight', label: 'Вес', icon: 'scale' },
+  { id: 'clean', label: 'Уборка', icon: 'broom' },
+  { id: 'water', label: 'Вода', icon: 'drop' },
 ]
 
-export default function BottomTabs({ tab, setTab }) {
-  const { logout } = useAuth()
-  const [open, setOpen] = useState(false)
-  const current = TABS.find((t) => t.id === tab) || TABS[0]
-
-  function choose(id) {
-    setTab(id)
-    setOpen(false)
-  }
-
-  // items rise from the trigger; last index closest to the button = smallest delay
-  const items = [...TABS].reverse()
-
+// Dark pill dock: the active tab grows into a peach capsule with its label.
+export default function BottomTabs({ tab, setTab, alerts = {} }) {
   return (
-    <>
-      <div className={`dock-scrim ${open ? 'show' : ''}`} onClick={() => setOpen(false)} />
-
-      <nav className={`dock ${open ? 'open' : ''}`}>
-        <ul className="dock-menu" aria-hidden={!open}>
-          {items.map((t, i) => (
-            <li
-              key={t.id}
-              className="dock-item"
-              style={{ transitionDelay: `${open ? i * 45 : (items.length - 1 - i) * 25}ms` }}
-            >
-              <button
-                className={`dock-pill ${tab === t.id ? 'active' : ''}`}
-                onClick={() => choose(t.id)}
-              >
-                <span className="dock-ico">{t.icon}</span>
-                <span className="dock-label">{t.label}</span>
-              </button>
-            </li>
-          ))}
-          <li
-            className="dock-item"
-            style={{ transitionDelay: `${open ? items.length * 45 : 0}ms` }}
-          >
-            <button className="dock-pill dock-logout" onClick={logout}>
-              <span className="dock-ico">🚪</span>
-              <span className="dock-label">Выйти</span>
-            </button>
-          </li>
-        </ul>
-
-        <button className="dock-trigger" onClick={() => setOpen((o) => !o)}>
-          <span className="dock-trigger-ico">{open ? '✕' : current.icon}</span>
-          <span className="dock-trigger-label">{open ? 'Закрыть' : current.label}</span>
-          <span className={`dock-caret ${open ? 'up' : ''}`}>▾</span>
+    <nav className="dock" aria-label="Разделы">
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          className={`dock-btn ${tab === t.id ? 'on' : ''}`}
+          onClick={() => setTab(t.id)}
+          aria-current={tab === t.id ? 'page' : undefined}
+          aria-label={t.label}
+        >
+          <Icon name={t.icon} />
+          <span className="dock-label">{t.label}</span>
+          {alerts[t.id] && tab !== t.id && <i className="dock-dot" />}
         </button>
-      </nav>
-    </>
+      ))}
+    </nav>
   )
 }

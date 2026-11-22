@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
-import { sel, ins, patch, del, callFn } from './lib/supabase.js'
-import { todayISO, daysSince } from './lib/dates.js'
+import { sel, ins, patch, del } from './lib/supabase.js'
+import { todayISO, daysSince, daysBetween } from './lib/dates.js'
 import { useAuth } from './auth.jsx'
 
 const DIRTY_DAYS = 2 // strictly more than 2 days without cleaning → dirty
 const WATER_DAYS = 2 // strictly more than 2 days without fresh water → Yuki is "hot"
 const WEIGH_DAYS = 10 // more than ~1.5 weeks without weighing → ask to weigh
+const HUNGRY_HOUR = 12 // nothing logged today by noon → Yuki is "hungry" (blue)
 
 const DataCtx = createContext(null)
 
@@ -25,6 +26,17 @@ export function DataProvider({ children }) {
   const [feedings, setFeedings] = useState([])
   const [pet, setPet] = useState({ name: 'Юки', birthdate: '2024-02-15' })
   const [loading, setLoading] = useState(true)
+  const [tick, setTick] = useState(0) // re-derive time-based status (hungry / night) while the app stays open
+
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 5 * 60 * 1000)
+    const onVis = () => document.visibilityState === 'visible' && setTick((t) => t + 1)
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [])
 
   // initial load
   useEffect(() => {
@@ -113,7 +125,7 @@ export function DataProvider({ children }) {
         grams,
         note: note || null,
         ai_rec: null,
-        ai_status: 'pending',
+        ai_status: 'idle',
         created_by: by,
         created_at: new Date().toISOString(),
       }
@@ -124,13 +136,9 @@ export function DataProvider({ children }) {
         ),
       )
       try {
-        const row = await ins('weights', { measured_on: date, grams, note: note || null, created_by: by, ai_status: 'pending' }, { upsert: true, onConflict: 'measured_on' })
-        if (row) setWeights((xs) => xs.map((x) => (x.measured_on === date ? { ...row, ai_status: 'pending' } : x)))
-        // fire AI recommendation (non-blocking)
-        callFn('ai-weight-rec', { measured_on: date }).then((r) => {
-          if (r.ok) setWeights((xs) => xs.map((x) => (x.measured_on === date ? { ...x, ai_rec: r.data.ai_rec, ai_status: r.data.ai_status } : x)))
-          else setWeights((xs) => xs.map((x) => (x.measured_on === date ? { ...x, ai_status: 'error' } : x)))
-        })
+        // the AI analysis for this weighing is produced by the coach (see lib/coach.js)
+        const row = await ins('weights', { measured_on: date, grams, note: note || null, created_by: by, ai_status: 'idle' }, { upsert: true, onConflict: 'measured_on' })
+        if (row) setWeights((xs) => xs.map((x) => (x.measured_on === date ? row : x)))
       } catch (e) {
         console.error(e)
         setWeights((xs) => xs.filter((x) => x.id !== optimistic.id))
@@ -224,7 +232,33 @@ export function DataProvider({ children }) {
       .filter((f) => f.fed_on === today && feedFood && f.food_id === feedFood.id)
       .reduce((s, f) => s + Number(f.amount || 0), 0)
 
+    // food: nothing logged today by noon (or nothing at all since the day before yesterday) → hungry
+    const hour = new Date().getHours()
+    const lastFeedDay = feedings.reduce((m, f) => (f.fed_on > m ? f.fed_on : m), '')
+    const dSinceFeed = lastFeedDay ? daysBetween(lastFeedDay, today) : Infinity
+    const hungry = dSinceFeed > 1 || (dSinceFeed === 1 && hour >= HUNGRY_HOUR)
+    const freshToday = feedings
+      .filter((f) => f.fed_on === today && f.unit === 'g')
+      .reduce((s, f) => s + Number(f.amount || 0), 0)
+    const night = hour >= 23 || hour < 6
+    const mood = dirty ? 'dirty' : hot ? 'hot' : hungry ? 'hungry' : 'calm'
+
+    // change signatures: the AI coach re-analyses only when its input really changed
+    const todays = feedings.filter((f) => f.fed_on === today)
+    const sigFood = `${today}:${todays.length}:${todays.reduce((s, f) => s + Number(f.amount || 0), 0)}`
+    const sigClean = `${today}:${lastClean?.cleaned_at || ''}:${cleanings.length}`
+    const sigWater = `${today}:${lastWater?.changed_at || ''}:${waterings.length}`
+    const sigWeight = `${today}:${lastWeight?.measured_on || ''}:${lastWeight?.grams || ''}:${weights.length}`
+    const sigs = { food: sigFood, clean: sigClean, water: sigWater, weight: sigWeight, home: [sigFood, sigClean, sigWater, sigWeight].join('|') }
+
     return {
+      sigs,
+      mood,
+      hungry,
+      dSinceFeed,
+      lastFeedDay,
+      freshToday,
+      night,
       lastClean,
       dSinceClean,
       dirty,
@@ -238,7 +272,7 @@ export function DataProvider({ children }) {
       vitTarget,
       feedToday,
     }
-  }, [cleanings, waterings, weights, feedings, foods])
+  }, [cleanings, waterings, weights, feedings, foods, tick])
 
   const value = {
     loading,

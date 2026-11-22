@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState } from 'react'
+import YukiArt from './YukiArt.jsx'
 
 const ConfirmCtx = createContext(null)
 
@@ -27,8 +28,10 @@ export function ConfirmProvider({ children }) {
       {children}
       {state && (
         <div className="modal-scrim show" onClick={() => close(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-emoji">{o.emoji || '🐹'}</div>
+          <div className="modal" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-art">
+              <YukiArt mood={o.mood || 'sad'} size={104} />
+            </div>
             <div className="modal-title">{o.title || 'Точно удалить?'}</div>
             {o.message && <div className="modal-msg">{o.message}</div>}
             <div className="modal-actions">

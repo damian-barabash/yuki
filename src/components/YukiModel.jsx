@@ -1,7 +1,8 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
+import { bus } from '../lib/bus.js'
 
 function Model({ dirty }) {
   const { scene } = useGLTF('/model/yuki.glb', true)
@@ -48,12 +49,41 @@ function Model({ dirty }) {
 
   const spin = useRef()
   const bob = useRef(0)
+  const jump = useRef(null) // { t, dur, hops, height, turns }
+
+  // taps / celebrations make the model hop; 'popcorn' is the full happy-pig routine
+  useEffect(
+    () =>
+      bus.on('hop', ({ kind }) => {
+        jump.current =
+          kind === 'popcorn'
+            ? { t: 0, dur: 1.9, hops: 4, height: 0.55, turns: 2 }
+            : { t: 0, dur: 0.42, hops: 1, height: 0.22, turns: 0 }
+      }),
+    [],
+  )
+
   useFrame((_, dt) => {
-    if (spin.current) {
-      spin.current.rotation.y += dt * 0.6
-      bob.current += dt
-      spin.current.position.y = Math.sin(bob.current * 1.6) * 0.06
+    const g = spin.current
+    if (!g) return
+    bob.current += dt
+    let y = Math.sin(bob.current * 1.6) * 0.06
+    let speed = 0.6
+    let squash = 1
+    const j = jump.current
+    if (j) {
+      j.t += dt
+      const p = Math.min(1, j.t / j.dur)
+      const phase = (p * j.hops) % 1
+      const arc = Math.sin(phase * Math.PI)
+      y += arc * j.height * (1 - p * 0.35)
+      squash = 1 + arc * 0.08
+      speed += (j.turns * Math.PI * 2) / j.dur
+      if (p >= 1) jump.current = null
     }
+    g.rotation.y += dt * speed
+    g.position.y = y
+    g.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash))
   })
 
   return (

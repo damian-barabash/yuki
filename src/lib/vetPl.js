@@ -4,7 +4,6 @@
 export const FOOD_PL = {
   feed: 'Granulat (karma)',
   'vitamin-c': 'Witamina C',
-  hay: 'Siano',
   timothy: 'Tymotka łąkowa',
   'meadow-grass': 'Trawa łąkowa',
   'romaine-lettuce': 'Sałata rzymska',
