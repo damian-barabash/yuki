@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from './auth.jsx'
 import YukiArt from './components/YukiArt.jsx'
+import Paws from './components/Paws.jsx'
 
 export default function Login() {
   const { login } = useAuth()
@@ -20,6 +21,7 @@ export default function Login() {
 
   return (
     <div className="login">
+      <Paws />
       <form className="login-card" onSubmit={submit}>
         <div className="login-art" aria-hidden>
           <YukiArt mood={err ? 'sad' : busy ? 'wow' : 'happy'} size={150} />
@@ -51,7 +53,7 @@ export default function Login() {
 
         {err && <div className="form-err">{err}</div>}
 
-        <button className="btn btn-cream btn-xl" disabled={busy} type="submit">
+        <button className="btn btn-primary btn-xl" disabled={busy} type="submit">
           {busy ? 'Входим…' : 'Войти'}
         </button>
       </form>

@@ -7,6 +7,7 @@ import PetStage from './components/PetStage.jsx'
 import BottomTabs from './components/BottomTabs.jsx'
 import Cheer from './components/Cheer.jsx'
 import YukiArt from './components/YukiArt.jsx'
+import Paws from './components/Paws.jsx'
 import HomeTab from './tabs/HomeTab.jsx'
 import CareTab from './tabs/CareTab.jsx'
 import WeightTab from './tabs/WeightTab.jsx'
@@ -14,13 +15,14 @@ import FeedTab from './tabs/FeedTab.jsx'
 import SettingsTab from './tabs/SettingsTab.jsx'
 
 // status colour of the whole app; also pushed to the browser chrome
-const MOOD_COLOR = { calm: '#1E9E6A', dirty: '#E2493F', hot: '#F0862A', hungry: '#2549D8' }
+const MOOD_COLOR = { calm: '#B7E3DA', dirty: '#F7BDB5', hot: '#FBD29D', hungry: '#B9CBFB' }
 
 function Splash() {
   // one of a few poses, picked once — sometimes he peeks out of his tunnel
   const [pose] = useState(() => [{ mood: 'idle' }, { mood: 'happy' }, { mood: 'wow', prop: 'tunnel' }][Math.floor(Math.random() * 3)])
   return (
     <div className="splash">
+      <Paws />
       <div className="splash-art">
         <YukiArt {...pose} size={132} />
       </div>

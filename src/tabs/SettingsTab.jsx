@@ -76,13 +76,18 @@ export default function SettingsTab() {
 
   return (
     <div className="tab">
+      <div className="page-head">
+        <h2>Настройки</h2>
+      </div>
+
       <section className="vet-entry">
         <div className="vet-entry-art"><YukiArt mood="idle" size={92} /></div>
         <div className="vet-entry-txt">
           <h3>Отчёт для ветеринара</h3>
           <p>Вес, питание, витамин C и гигиена — на польском, на одном экране. Открой на приёме или сохрани в PDF.</p>
-          <button className="btn btn-cream" onClick={() => setVetOpen(true)}>
-            <Icon name="vet" size={20} /> Tryb weterynaryjny
+          <button className="btn btn-primary has-badge" onClick={() => setVetOpen(true)}>
+            <span className="btn-badge"><Icon name="vet" size={20} /></span>
+            <span className="btn-txt">Открыть отчёт</span>
           </button>
         </div>
       </section>

@@ -143,6 +143,11 @@ export default function FeedTab() {
 
   return (
     <div className="tab">
+      <div className="page-head">
+        <h2>Питание</h2>
+        <span>{isToday ? 'сегодня' : fmtDateFull(day)}</span>
+      </div>
+
       {/* day picker */}
       <div className="daystrip">
         {week.map((d) => (
@@ -211,13 +216,13 @@ export default function FeedTab() {
       {/* saved portions → one tap */}
       {favorites.length > 0 && (
         <section>
-          <h3 className="sec-title"><Icon name="star" size={16} /> Мои порции</h3>
+          <h3 className="sec-title">Мои порции <small>нажми, чтобы дать</small></h3>
           <div className="fav-chips">
             {favorites.map((f) => (
               <button key={f.id} className="fav-chip" onClick={() => feedProduce(f, foodPrefs[f.id])}>
                 <FoodIcon food={f} size={26} />
                 <span className="fav-name">{f.name_ru}</span>
-                <span className="fav-g">{foodPrefs[f.id]} г</span>
+                <span className="fav-g">+{foodPrefs[f.id]} г</span>
               </button>
             ))}
           </div>
@@ -226,7 +231,7 @@ export default function FeedTab() {
 
       {/* catalog */}
       <section>
-        <h3 className="sec-title">Дать что-то ещё</h3>
+        <h3 className="sec-title">Дать что-то ещё <small>найди или выбери раздел</small></h3>
         <label className="search">
           <Icon name="search" size={20} />
           <input
@@ -293,6 +298,7 @@ export default function FeedTab() {
                         <span className="food-note">{f.freq_note_ru}</span>
                       </span>
                       <span className={`safety ${saf.cls}`}>{saf.txt}</span>
+                      <i className={`food-chev ${open ? 'up' : ''}`}><Icon name="down" size={18} /></i>
                     </button>
                     {def && f.safety !== 'forbidden' && (
                       <button className="quick-give" onClick={() => feedProduce(f, def)} aria-label={`Дать ${def} г`}>
@@ -402,7 +408,8 @@ export default function FeedTab() {
               return (
                 <button key={d} className="hist-day" onClick={() => { setDay(d); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
                   <div className="hist-date">
-                    {fmtDateFull(d)} <span>{weekday(d)}</span>
+                    <b>{fmtDateFull(d)}</b> <span>{weekday(d)}</span>
+                    <i className="go"><Icon name="right" size={16} /></i>
                   </div>
                   <div className="hist-items">
                     {Object.values(map).map((m) => (

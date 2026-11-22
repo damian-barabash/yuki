@@ -38,13 +38,14 @@ export default function CoachCard({ scope, signature, extra, label = 'Разбо
     <section className={`coach ${loading ? 'is-refreshing' : ''}`}>
       <div className="coach-head">
         <span className="coach-badge"><Icon name="spark" size={16} /> {label}</span>
-        <button className="coach-refresh" onClick={refresh} disabled={loading} aria-label="Обновить разбор">
-          <Icon name="refresh" size={18} />
+        <button className="coach-refresh" onClick={refresh} disabled={loading}>
+          <Icon name="refresh" size={16} /> {loading ? 'Думаю…' : 'Обновить'}
         </button>
       </div>
       <h3 className="coach-title">{data.title}</h3>
       <p className="coach-text">{data.text}</p>
 
+      {data.actions?.length > 0 && <div className="coach-sub">Что сделать</div>}
       {data.actions?.length > 0 && (
         <ul className="coach-actions">
           {data.actions.map((a, i) => (
@@ -60,8 +61,8 @@ export default function CoachCard({ scope, signature, extra, label = 'Разбо
         <>
           <button className="coach-more" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             <Icon name="eye" size={16} />
-            {open ? 'Скрыть наблюдения' : `Что я вижу в дневнике · ${problems.length ? `${problems.length} на заметку` : 'всё хорошо'}`}
-            <Icon name="down" size={16} className={`chev ${open ? 'up' : ''}`} />
+            <span>{open ? 'Скрыть наблюдения' : `Все наблюдения · ${problems.length ? `${problems.length} на заметку` : 'всё хорошо'}`}</span>
+            <i className={`go ${open ? 'up' : ''}`}><Icon name="down" size={16} /></i>
           </button>
           {open && (
             <ul className="findings">

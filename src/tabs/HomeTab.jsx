@@ -6,7 +6,7 @@ import YukiArt from '../components/YukiArt.jsx'
 import CoachCard from '../components/CoachCard.jsx'
 import { Sparkline, Segments, RangeBar } from '../components/Viz.jsx'
 import { cheerClean, cheerWater, cheerFeed } from '../lib/cheers.js'
-import { todayISO, daysWord, fmtDate, ageString } from '../lib/dates.js'
+import { todayISO, daysWord, fmtDate } from '../lib/dates.js'
 
 const FRESH = [80, 150]
 
@@ -16,7 +16,7 @@ function ago(d, zero) {
 }
 
 export default function HomeTab({ setTab }) {
-  const { status, weights, feedings, foods, pet, addCleaning, addWatering, addFeeding } = useData()
+  const { status, weights, feedings, foods, addCleaning, addWatering, addFeeding } = useData()
   const { dirty, hot, hungry, needsWeigh, dSinceClean, dSinceWater, dSinceWeigh, dSinceFeed, lastWeight, vitToday, vitTarget, freshToday, feedToday } = status
   const today = todayISO()
 
@@ -58,8 +58,16 @@ export default function HomeTab({ setTab }) {
 
   const perfect = tasks.length === 0
 
+  const dateLbl = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })
+  const Go = () => <i className="go"><Icon name="right" size={16} /></i>
+
   return (
     <div className="tab">
+      <div className="page-head">
+        <h2>Сегодня</h2>
+        <span>{dateLbl}</span>
+      </div>
+
       {perfect ? (
         <div className="perfect">
           <YukiArt mood="happy" prop="crown" size={86} />
@@ -83,55 +91,79 @@ export default function HomeTab({ setTab }) {
         </div>
       )}
 
+      <div className="bento">
+        <button className={`tile ${dirty ? 'is-bad' : ''}`} onClick={() => setTab('clean')}>
+          <span className="tile-top">
+            <span className="tile-ico"><Icon name="broom" size={20} /></span>
+            <span className="tile-label">Уборка</span>
+            <Go />
+          </span>
+          <span className="tile-val">{ago(dSinceClean, 'сегодня')}</span>
+        </button>
+
+        <button className={`tile ${hot ? 'is-bad' : ''}`} onClick={() => setTab('water')}>
+          <span className="tile-top">
+            <span className="tile-ico"><Icon name="drop" size={20} /></span>
+            <span className="tile-label">Вода</span>
+            <Go />
+          </span>
+          <span className="tile-val">{ago(dSinceWater, 'сегодня')}</span>
+        </button>
+      </div>
+
       <CoachCard scope="home" signature={status.sigs.home} label="Разбор дня от ИИ" />
 
       <div className="bento">
+        <button className={`tile tile-wide ${hungry ? 'is-bad' : ''}`} onClick={() => setTab('feed')}>
+          <span className="tile-top">
+            <span className="tile-ico"><Icon name="food" size={20} /></span>
+            <span className="tile-label">Еда сегодня</span>
+            <Go />
+          </span>
+          <span className="tile-num">
+            {Math.round(freshToday)}
+            <small> г свежего</small>
+          </span>
+          <RangeBar value={freshToday} min={FRESH[0]} max={FRESH[1]} />
+          <span className="tile-icons">
+            {eaten.slice(0, 7).map((e) => (
+              <i key={e.food.id}><FoodIcon food={e.food} size={22} /></i>
+            ))}
+            {eaten.length === 0 && <em>пока ничего не записано</em>}
+            {eaten.length > 7 && <em>+{eaten.length - 7}</em>}
+          </span>
+          <span className="tile-foot">ориентир {FRESH[0]}–{FRESH[1]} г в день · корм {feedToday} порц.</span>
+        </button>
+
         <button className="tile tile-weight" onClick={() => setTab('weight')}>
-          <span className="tile-label">Вес</span>
+          <span className="tile-top">
+            <span className="tile-ico"><Icon name="scale" size={20} /></span>
+            <span className="tile-label">Вес</span>
+            <Go />
+          </span>
           <span className="tile-num">
             {lastWeight ? Number(lastWeight.grams) : '—'}
             <small> г</small>
           </span>
-          {delta !== null && <span className={`pill-delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}`}>{delta > 0 ? '+' : ''}{Math.round(delta * 10) / 10} г к прошлому</span>}
           <Sparkline values={series} />
-          <span className="tile-foot">{lastWeight ? fmtDate(lastWeight.measured_on) : 'нет взвешиваний'} · {ageString(pet.birthdate, today)}</span>
+          <span className="tile-foot">
+            {delta !== null ? `${delta > 0 ? '+' : ''}${Math.round(delta * 10) / 10} г к прошлому · ` : ''}
+            {lastWeight ? fmtDate(lastWeight.measured_on) : 'нет взвешиваний'}
+          </span>
         </button>
 
         <button className="tile tile-vit" onClick={() => setTab('feed')}>
-          <span className="tile-row">
-            <span className="tile-label">Витамин C</span>
-            <span className="tile-frac">{vitToday}/{vitTarget}</span>
+          <span className="tile-top">
+            <span className="tile-ico"><Icon name="pill" size={20} /></span>
+            <span className="tile-label">Вит. C</span>
+            <Go />
+          </span>
+          <span className="tile-num">
+            {vitToday}
+            <small> из {vitTarget}</small>
           </span>
           <Segments value={vitToday} total={vitTarget} />
-          <span className="tile-foot">{vitToday >= vitTarget ? 'на сегодня всё' : `осталось ${vitTarget - vitToday}`}</span>
-        </button>
-
-        <button className="tile tile-food" onClick={() => setTab('feed')}>
-          <span className="tile-row">
-            <span className="tile-label">Свежее сегодня</span>
-            <span className="tile-frac">{Math.round(freshToday)} г</span>
-          </span>
-          <RangeBar value={freshToday} min={FRESH[0]} max={FRESH[1]} />
-          <span className="tile-icons">
-            {eaten.slice(0, 5).map((e) => (
-              <i key={e.food.id}><FoodIcon food={e.food} size={22} /></i>
-            ))}
-            {eaten.length === 0 && <em>пока ничего</em>}
-            {eaten.length > 5 && <em>+{eaten.length - 5}</em>}
-          </span>
-          <span className="tile-foot">ориентир {FRESH[0]}–{FRESH[1]} г · корм {feedToday} порц.</span>
-        </button>
-
-        <button className={`tile tile-mini ${dirty ? 'is-bad' : ''}`} onClick={() => setTab('clean')}>
-          <span className="tile-ico"><Icon name="broom" /></span>
-          <span className="tile-label">Уборка</span>
-          <span className="tile-val">{ago(dSinceClean, 'сегодня')}</span>
-        </button>
-
-        <button className={`tile tile-mini ${hot ? 'is-bad' : ''}`} onClick={() => setTab('water')}>
-          <span className="tile-ico"><Icon name="drop" /></span>
-          <span className="tile-label">Вода</span>
-          <span className="tile-val">{ago(dSinceWater, 'сегодня')}</span>
+          <span className="tile-foot">{vitToday >= vitTarget ? 'на сегодня всё' : `осталось дать ${vitTarget - vitToday}`}</span>
         </button>
       </div>
     </div>

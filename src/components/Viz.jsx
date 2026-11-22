@@ -1,23 +1,27 @@
 // Tiny dependency-free data visuals shared by the tabs.
 import { isoOf, MS_DAY } from '../lib/dates.js'
 
-// Sparkline for a short numeric series
-export function Sparkline({ values, w = 120, h = 44 }) {
-  if (!values || values.length < 2) return <svg width={w} height={h} aria-hidden />
+// Sparkline for a short numeric series. The line stretches with the card, so the
+// end point is an HTML dot placed by percentages (an SVG circle would deform).
+export function Sparkline({ values, h = 46 }) {
+  if (!values || values.length < 2) return <div className="spark-box" style={{ height: h }} aria-hidden />
+  const W = 100
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min || 1
-  const px = (i) => 4 + (i / (values.length - 1)) * (w - 8)
-  const py = (v) => 5 + (1 - (v - min) / span) * (h - 12)
-  const d = values.map((v, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)} ${py(v).toFixed(1)}`).join(' ')
+  const px = (i) => 3 + (i / (values.length - 1)) * (W - 9)
+  const py = (v) => 7 + (1 - (v - min) / span) * (h - 15)
+  const d = values.map((v, i) => `${i ? 'L' : 'M'}${px(i).toFixed(2)} ${py(v).toFixed(2)}`).join(' ')
   const lx = px(values.length - 1)
   const ly = py(values[values.length - 1])
   return (
-    <svg className="spark" width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
-      <path d={`${d} L${lx} ${h} L4 ${h} Z`} className="spark-area" />
-      <path d={d} className="spark-line" vectorEffect="non-scaling-stroke" />
-      <circle cx={lx} cy={ly} r="3.6" className="spark-dot" />
-    </svg>
+    <div className="spark-box" style={{ height: h }} aria-hidden>
+      <svg className="spark" viewBox={`0 0 ${W} ${h}`} preserveAspectRatio="none">
+        <path d={`${d} L${lx} ${h} L3 ${h} Z`} className="spark-area" />
+        <path d={d} className="spark-line" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <i className="spark-dot" style={{ left: `${lx}%`, top: ly }} />
+    </div>
   )
 }
 

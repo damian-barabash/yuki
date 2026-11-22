@@ -4,10 +4,10 @@ import YukiModel from './YukiModel.jsx'
 import FoodIcon from './FoodIcon.jsx'
 import Icon from './Icon.jsx'
 import Dossier from './Dossier.jsx'
+import Paws from './Paws.jsx'
 import { useData } from '../data.jsx'
 import { bus, yukiCheer, yukiHop } from '../lib/bus.js'
 import { WASH, HOT, WEIGH, IDLE, HUNGRY, NIGHT, TAP, PET, pick } from '../lib/phrases.js'
-import { daysWord } from '../lib/dates.js'
 import { wheek, buzz, isBirthday } from '../lib/eggs.js'
 
 // fixed dirt blotches over the model when the cage is dirty
@@ -39,8 +39,7 @@ let flyKey = 0
 
 export default function PetStage({ tab, setTab }) {
   const { status, pet } = useData()
-  const { dirty, hot, hungry, needsWeigh, night, dSinceClean, dSinceWater, lastWeight, vitToday, vitTarget, mood } = status
-  const compact = tab !== 'home'
+  const { dirty, hot, hungry, needsWeigh, night } = status
 
   const [bubble, setBubble] = useState('')
   const [flies, setFlies] = useState([])
@@ -173,34 +172,16 @@ export default function PetStage({ tab, setTab }) {
   const alarm = dirty || hot || hungry
   const hour = new Date().getHours()
 
-  const chips = [
-    { id: 'clean', icon: 'broom', bad: dirty, txt: isFinite(dSinceClean) ? (dSinceClean === 0 ? 'убрано сегодня' : `${dSinceClean} ${daysWord(dSinceClean)} назад`) : 'не убирали' },
-    { id: 'water', icon: 'drop', bad: hot, txt: isFinite(dSinceWater) ? (dSinceWater === 0 ? 'вода свежая' : `вода ${dSinceWater} ${daysWord(dSinceWater)}`) : 'воду не меняли' },
-    { id: 'weight', icon: 'scale', bad: needsWeigh, txt: lastWeight ? `${Number(lastWeight.grams)} г` : 'нет веса' },
-    { id: 'feed', icon: 'pill', bad: hungry, txt: `вит. C ${vitToday}/${vitTarget}` },
-  ]
-
   return (
-    <section className={`hero ${compact ? 'hero-compact' : ''}`}>
-      <div className="hero-deco" aria-hidden>
-        <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
-          <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M32 70c-9-5-10-14-5-16 3-1 5 1 5 3 1-2 3-4 6-3 5 2 4 11-6 16Z" />
-            <path d="M356 44l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" />
-            <path d="M340 210c10-14 26-14 36 0" />
-            <path d="M22 200q10-10 20 0t20 0" />
-            <circle cx="300" cy="120" r="5" />
-            <circle cx="70" cy="140" r="4" />
-          </g>
-        </svg>
-      </div>
+    <section className="hero">
+      <Paws />
 
       <header className="hero-top">
         <div className="hero-id" onClick={nameTap}>
           <span className="hero-hello">{greeting(hour)}</span>
           <h1 className="hero-name">{pet.name || 'Юки'}</h1>
         </div>
-        <button className={`round-btn ${tab === 'settings' ? 'on' : ''}`} onClick={() => setTab(tab === 'settings' ? 'home' : 'settings')} aria-label="Настройки">
+        <button className={`round-btn ${tab === 'settings' ? 'on' : ''}`} onClick={() => setTab(tab === 'settings' ? 'home' : 'settings')} aria-label={tab === 'settings' ? 'Закрыть настройки' : 'Настройки'}>
           <Icon name={tab === 'settings' ? 'x' : 'gear'} />
         </button>
       </header>
@@ -209,7 +190,7 @@ export default function PetStage({ tab, setTab }) {
         <div className="bubble-slot">
           {bubble && (
             <div className={`bubble ${alarm ? 'bubble-alarm' : ''}`} key={bubble}>
-              {bubble}
+              <span>{bubble}</span>
             </div>
           )}
         </div>
@@ -222,7 +203,7 @@ export default function PetStage({ tab, setTab }) {
           onPointerCancel={cancel}
           onContextMenu={(e) => e.preventDefault()}
         >
-          <Canvas camera={{ position: [0, 0.15, 4.4], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+          <Canvas camera={{ position: [0, 0.1, 3.7], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
             <Suspense fallback={null}>
               <YukiModel dirty={dirty} />
             </Suspense>
@@ -261,15 +242,6 @@ export default function PetStage({ tab, setTab }) {
             </span>
           ))}
         </div>
-      </div>
-
-      <div className="hud">
-        {chips.map((c) => (
-          <button key={c.id} className={`hud-chip ${c.bad ? 'bad' : ''}`} onClick={() => setTab(c.id)}>
-            <Icon name={c.icon} size={16} />
-            <span>{c.txt}</span>
-          </button>
-        ))}
       </div>
 
       {dossier && <Dossier onClose={() => setDossier(false)} />}

@@ -4,8 +4,8 @@
   "description": "Дневник ухода за морской свинкой Юки",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4EEE1",
-  "theme_color": "#1E9E6A",
+  "background_color": "#B7E3DA",
+  "theme_color": "#B7E3DA",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },

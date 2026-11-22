@@ -74,6 +74,11 @@ export default function WeightTab() {
 
   return (
     <div className="tab">
+      <div className="page-head">
+        <h2>Вес</h2>
+        <span>норма {NORM[0]}–{NORM[1]} г</span>
+      </div>
+
       {needsWeigh && (
         <div className="task tone-ink">
           <span className="task-ico"><Icon name="scale" /></span>
@@ -140,8 +145,9 @@ export default function WeightTab() {
           <span>Заметка (необязательно)</span>
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="после ужина…" />
         </label>
-        <button className="btn btn-primary btn-block" disabled={busy || !grams} type="submit">
-          {busy ? 'Сохраняем…' : 'Сохранить вес'}
+        <button className="btn btn-primary btn-block has-badge" disabled={busy || !grams} type="submit">
+          <span className="btn-badge"><Icon name="scale" /></span>
+          <span className="btn-txt">{busy ? 'Сохраняем…' : 'Сохранить вес'}</span>
         </button>
       </form>
 

@@ -69,11 +69,15 @@ export default function CareTab({ kind }) {
 
   return (
     <div className="tab">
+      <div className="page-head">
+        <h2>{k.title}</h2>
+      </div>
+
       <section className={`status-card ${bad ? 'is-bad' : 'is-ok'}`}>
         <div className="status-top">
           <span className="status-ico"><Icon name={k.icon} size={26} /></span>
           <div>
-            <div className="status-kicker">{k.title}</div>
+            <div className="status-kicker">{bad ? 'нужно действие' : 'всё в порядке'}</div>
             <div className="status-title">{bad ? k.badTitle : k.okTitle}</div>
           </div>
         </div>
@@ -90,8 +94,9 @@ export default function CareTab({ kind }) {
         <DotStrip timestamps={rows.map(tsOf)} days={21} />
       </section>
 
-      <button className="btn btn-primary btn-xl" onClick={now}>
-        <Icon name="check" stroke={2.6} /> {k.cta}
+      <button className="btn btn-primary btn-xl has-badge" onClick={now}>
+        <span className="btn-badge"><Icon name={k.icon} /></span>
+        <span className="btn-txt">{k.cta}</span>
       </button>
 
       {pastOpen ? (
